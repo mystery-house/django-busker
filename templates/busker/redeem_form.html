@@ -1,0 +1,5 @@
+<form action="{% url 'busker:redeem' %}" method="POST">
+    {%  csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Redeem Code"/>
+</form>
