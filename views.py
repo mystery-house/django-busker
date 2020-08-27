@@ -7,7 +7,8 @@ from .forms import RedeemCodeForm
 from .models import DownloadCode, File
 
 
-# TODO reusable validate_code function that checks that a code exists, has uses remaining, and is not expired
+# TODO confirmation step that indicates how many uses a code has left / asks user if they're sure they want to use one
+
 
 # Create your views here.
 class RedeemView(TemplateView):

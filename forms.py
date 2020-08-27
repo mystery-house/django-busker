@@ -8,11 +8,12 @@ class RedeemCodeForm(forms.Form):
     code_object = None
 
     def clean_code(self):
-        """Custom clean method for the `code` field; checks that the code entered is valid."""
+        """
+        Custom clean method for the `code` field; checks that the code entered is valid.
+        """
         submitted_code = self.cleaned_data['code']
         validated_code = validate_code(submitted_code)
         if validated_code is False:
             raise ValidationError("The code you entered is not valid, or has already been redeemed.")
         self.code_object = validated_code
         return submitted_code
-
