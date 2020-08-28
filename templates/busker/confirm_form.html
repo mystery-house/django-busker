@@ -1,0 +1,7 @@
+<form action="{% url 'busker:redeem' form.code.value %}" method="POST">
+    {% csrf_token %}
+    <p>This code has {{ code.remaining_uses }} use{{ code.remaining_uses|pluralize }} left.
+    Are you sure you want to redeem it now?</p>
+    {{ form.as_p }}
+    <input type="submit" value="Continue">
+</form>

@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import RedeemFormView, DownloadView
+from .views import RedeemView, RedeemFormView, DownloadView
 
 app_name = 'busker'
 urlpatterns = [
-    path('redeem/', RedeemFormView.as_view(), name='redeem'),
-    path('download/<str:file_id>/<str:download_code>', DownloadView.as_view(), name='download')
+    path('redeem/<str:download_code>/', RedeemView.as_view(), name='redeem'),
+    path('', RedeemFormView.as_view(), name='redeem_form'),
+    path('download/<str:file_id>/', DownloadView.as_view(), name='download')
 ]

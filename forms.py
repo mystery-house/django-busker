@@ -3,6 +3,10 @@ from django.core.exceptions import ValidationError
 from .models import validate_code
 
 
+class ConfirmForm(forms.Form):
+    code = forms.CharField(widget=forms.HiddenInput)
+
+
 class RedeemCodeForm(forms.Form):
     code = forms.CharField(max_length=7, label="Enter Your Download Code Here")
     code_object = None

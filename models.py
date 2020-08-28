@@ -121,6 +121,13 @@ class DownloadCode(BuskerModel):
                                                         "originally created, but can be overridden.")
     times_used = models.IntegerField(default=0)
 
+    @property
+    def remaining_uses(self):
+        """
+        Indicates the number of uses remaining for a code.
+        """
+        return self.max_uses - self.times_used
+
     def __str__(self):
         return self.id
 
