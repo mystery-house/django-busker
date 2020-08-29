@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.urls import reverse
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
 
@@ -120,6 +121,7 @@ class DownloadCode(BuskerModel):
     max_uses = models.IntegerField(default=3, help_text="This is typically initially determined when a Batch is "
                                                         "originally created, but can be overridden.")
     times_used = models.IntegerField(default=0)
+    last_used_date = models.DateTimeField(null=True, blank=True)
 
     @property
     def remaining_uses(self):
@@ -127,6 +129,14 @@ class DownloadCode(BuskerModel):
         Indicates the number of uses remaining for a code.
         """
         return self.max_uses - self.times_used
+
+    @property
+    def redeem_uri(self):
+        """
+        The URI that can be used to redeem this code. (Unfortunately there is no convenient way to build
+        an absolute URL without a request object.)
+        """
+        return reverse('busker:redeem', kwargs={'download_code': self.id} )
 
     def __str__(self):
         return self.id
