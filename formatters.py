@@ -13,17 +13,25 @@ def format_codes_csv(query_set):
     """
     header_map = {
         'id': 'download_code',
+        'created_date': 'code_created_date',
         'batch__work__artist__name': 'artist',
         'batch__work__title': 'title',
-        # 'max_uses': 'max_uses',
-        # 'times_used': 'times_used',
-        # 'last_used_date': 'last_used_date',
+        'batch__label': 'batch_label',
+        'batch__created_date': 'batch_created_date',
+        'batch__private_note': 'batch_private_note',
         'batch__id': 'batch_id',
         'batch__work__artist__id': 'artist_id',
         'batch__work__id': 'work_id',
     }
 
-    return render_to_csv_response(query_set.values('id', 'batch__work__artist__name', 'batch__work__title', 'max_uses',
-                                                   'times_used', 'last_used_date', 'batch__id',
-                                                   'batch__work__artist__id', 'batch__work__id'),
-                                  field_header_map=header_map)
+    serializer_map = {
+        'created_date': (lambda x: x.strftime('%Y/%m/%d')),
+        'batch__created_date': (lambda x: x.strftime('%Y/%m/%d')),
+
+    }
+
+    return render_to_csv_response(query_set.values('id', 'created_date', 'batch__work__artist__name',
+                                                   'batch__work__title', 'max_uses', 'times_used', 'last_used_date',
+                                                   'batch__label', 'batch__private_note', 'batch__created_date',
+                                                   'batch__id', 'batch__work__artist__id', 'batch__work__id'),
+                                  field_header_map=header_map, field_serializer_map=serializer_map)
