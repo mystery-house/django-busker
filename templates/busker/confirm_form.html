@@ -1,7 +1,15 @@
+<h1>{{ code.batch.work.artist.name }} - {{ code.batch.work.title }}</h1>
+
 <form action="{% url 'busker:redeem' form.code.value %}" method="POST">
     {% csrf_token %}
-    <p>This code has {{ code.remaining_uses }} use{{ code.remaining_uses|pluralize }} left.
-    Are you sure you want to redeem it now?</p>
-    {{ form.as_p }}
-    <input type="submit" value="Continue">
+    {% if code.max_uses == 0 %}
+        <p>This code entitles you to unlimited downloads.</p>
+    {% elif code.remaining_uses > 0 %}
+        <p>This code has {{ code.remaining_uses }} use{{ code.remaining_uses|pluralize }} left.
+        Are you sure you want to redeem it now?</p>
+        {{ form.as_p }}
+        <input type="submit" value="Continue">
+    {% else %}
+        This code has already been used.
+    {% endif %}
 </form>
