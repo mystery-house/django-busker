@@ -1,13 +1,11 @@
 from datetime import datetime
 from django.http import HttpResponse, Http404
 from django.shortcuts import render
-from django.views.generic import View, TemplateView, FormView
+from django.urls import reverse
+from django.views.generic import View, FormView
 import magic
 from .forms import RedeemCodeForm, ConfirmForm
 from .models import DownloadCode, File, validate_code
-
-
-# TODO confirmation step that indicates how many uses a code has left / asks user if they're sure they want to use one
 
 
 class RedeemView(FormView):
@@ -63,10 +61,16 @@ class DownloadView(View):  # TODO validate against a token set in the session
 
 
 class RedeemFormView(FormView):
+    """
+    Simple form for manual entry of a code. Does not validate anything on submission; validation happens in RedeemView
+    """
     form_class = RedeemCodeForm
     template_name = 'busker/redeem_form.html'
+    entered_code = None
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        context['code'] = form.code_object
-        # TODO: redirect to the redemption URL
+        self.entered_code = form.cleaned_data['code']
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('busker:redeem', kwargs={'download_code': self.entered_code})
