@@ -3,7 +3,6 @@
 {% block page_title %}Download Files{% endblock %}
 {% block content %}
 <h2>{{ code.batch.work.artist.name }} - {{ code.batch.work.title }}</h2>
-<hr>
 <table>
 {% for file in code.batch.work.file_set.all %}
     <tr>
