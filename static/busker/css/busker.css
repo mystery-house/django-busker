@@ -2,10 +2,33 @@ div.busker-main {
     margin-top: 1rem;
 }
 
+div.busker-thumbnail {
+    text-align:center;
+}
+
+div.busker-thumbnail img {
+    width:400px;
+    height:400px;
+}
+
 h1 {
-    font-size: 3.0rem;
+    font-size: 1.5em;
 }
 
 h2 {
-    font-size: 2.5rem;
+    font-size: 1.25em;
+}
+
+@media screen and (max-width: 640px),  screen and (max-height: 640px){
+    div.busker-thumbnail img {
+        width:200px;
+        height:200px;
+    }
+}
+
+@media screen and (max-width: 300px),  screen and (max-height: 300px){
+    div.busker-thumbnail img {
+        width:100px;
+        height:100px;
+    }
 }

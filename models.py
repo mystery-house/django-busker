@@ -1,3 +1,4 @@
+from io import BytesIO
 import random
 import string
 
@@ -7,13 +8,18 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFit
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
+
+# TODO S3 storage
+# TODO make work status field boolean
 
 
 def validate_code(code):
     try:
-        return DownloadCode.objects.get(pk=code, batch__work__status=1)  # TODO validate on redemption count as well
+        return DownloadCode.objects.get(pk__iexact=code, batch__work__status=1) # TODO also filter by "max_uses equals 0 OR times_used < max_uses subquery"
     except DownloadCode.DoesNotExist as e:
         return False
 
@@ -33,6 +39,14 @@ def generate_code():
         except DownloadCode.DoesNotExist as e:
             new_code = code
     return new_code
+
+
+def work_image_path(instance, filename):
+    return f"busker/downloadable_work_images/{instance.id}/{filename}"
+
+
+def work_file_path(instance, filename):
+    return f"busker/files/{instance.id}/{filename}"
 
 
 class BuskerModel(models.Model):
@@ -69,6 +83,11 @@ class DownloadableWork(BuskerModel):
     title = models.CharField(max_length=255,
                              help_text="The title of the work.")
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
+    image = models.ImageField(null=True, blank=True, help_text="An optional image to be displayed on the code "
+                                                               "redemption screen. (For example album art.)",
+                              upload_to=work_image_path)
+    thumbnail = ImageSpecField(source='image', processors=[ResizeToFit(400, 400)], format='JPEG',
+                               options={'quality': 85})
     status = models.IntegerField(choices=STATUS_CHOICES, default=1,
                                  help_text="Draft items will not be available for download.")
 
@@ -85,7 +104,7 @@ class File(BuskerModel):
     """
     description = models.CharField(max_length=255,
                                    help_text="A brief description of the file (I.E., \"High-quality 320Kbps MP3\", etc.")
-    file = models.FileField()  # TODO per-user destination path, S3 backend
+    file = models.FileField(upload_to=work_file_path)
     work = models.ForeignKey(DownloadableWork, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -126,6 +145,7 @@ class DownloadCode(BuskerModel):
     """
     Represents an individual download code created for a DownloadableWork.
     """
+    # TODO validate ID to ensure uppercase and 0-9 only?
     id = models.CharField(primary_key=True, max_length=7, default=generate_code)
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
     max_uses = models.IntegerField(default=3, help_text="This is typically initially determined when a Batch is "

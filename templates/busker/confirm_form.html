@@ -1,4 +1,5 @@
 {% extends "busker/base.html" %}
+
 {% block html_title %}Redeem Code for {{ code.batch.work.artist.name }} - {{ code.batch.work.title }}{% endblock %}
 {% block page_title %}{{ code.batch.work.artist.name }} - {{ code.batch.work.title }}{% endblock %}
 {% block content %}
@@ -7,13 +8,17 @@
 {% else %}
 <h2>Redeem Code</h2>
 {% endif %}
+    {% if code.batch.work.image %}
+        <div class="busker-thumbnail">
+            <img src="{{ code.batch.work.thumbnail.url }}" alt="{{ code.batch.work.title }}">
+        </div>
+    {% endif %}
 <form action="{% url 'busker:redeem' form.code.value %}" method="POST">
     {% csrf_token %}
     {% if code.max_uses == 0 %}
         <p>This code entitles you to unlimited downloads.</p>
     {% elif code.remaining_uses > 0 %}
-        <p>This code has {{ code.remaining_uses }} use{{ code.remaining_uses|pluralize }} left.
-        Are you sure you want to redeem it now?</p>
+        <p>This code has {{ code.remaining_uses }} use{{ code.remaining_uses|pluralize }} left.</p>
         {{ form.as_p }}
         <input type="submit" value="Continue">
     {% else %}
