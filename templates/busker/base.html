@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{% block html_title %}{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="{% static 'busker/css/normalize.css' %}">
+  <link rel="stylesheet" href="{% static 'busker/css/skeleton.css' %}">
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="one-column">
+        <h1>{% block page_title %}Basic Page{% endblock %}</h1>
+        {% block content %}
+
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,5 +1,10 @@
+{% extends "busker/base.html" %}
+{% block html_title %}Redeem Code{% endblock %}
+{% block page_title %}Redeem Code{% endblock %}
+{% block content %}
 <form action="{% url 'busker:redeem_form' %}" method="POST">
     {%  csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Redeem Code"/>
 </form>
+{% endblock %}

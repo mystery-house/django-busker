@@ -1,4 +1,8 @@
-<h1>{{ code.batch.work.artist.name }} - {{ code.batch.work.title }}</h1>
+{% extends "busker/base.html" %}
+{% block html_title %}Download Files{% endblock %}
+{% block page_title %}Download Files{% endblock %}
+{% block content %}
+<h2>{{ code.batch.work.artist.name }} - {{ code.batch.work.title }}</h2>
 <hr>
 <table>
 {% for file in code.batch.work.file_set.all %}
@@ -9,3 +13,4 @@
     <br>
 {% endfor %}
 </table>
+{% endblock %}
