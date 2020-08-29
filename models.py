@@ -46,6 +46,7 @@ class BuskerModel(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ('-created_date',)
 
 
 class Artist(BuskerModel):
@@ -55,6 +56,9 @@ class Artist(BuskerModel):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ('name',)
 
 
 class DownloadableWork(BuskerModel):
@@ -71,6 +75,9 @@ class DownloadableWork(BuskerModel):
     def __str__(self):
         return self.title
 
+    class Meta:
+        ordering = ('title', 'artist__name',)
+
 
 class File(BuskerModel):
     """
@@ -80,7 +87,9 @@ class File(BuskerModel):
                                    help_text="A brief description of the file (I.E., \"High-quality 320Kbps MP3\", etc.")
     file = models.FileField()  # TODO per-user destination path, S3 backend
     work = models.ForeignKey(DownloadableWork, on_delete=models.CASCADE)
-    # TODO sort order?
+
+    def __str__(self):
+        return self.file
 
 
 class Batch(BuskerModel):
@@ -110,6 +119,7 @@ class Batch(BuskerModel):
 
     class Meta:
         verbose_name_plural = "Batches"
+        ordering = ('-created_date', 'work__artist__name', 'work__title')
 
 
 class DownloadCode(BuskerModel):
