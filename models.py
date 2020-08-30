@@ -1,9 +1,10 @@
-from io import BytesIO
+import os
 import random
 import string
-
 from uuid import uuid4
+
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -14,12 +15,11 @@ from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
 
 # TODO S3 storage
-# TODO make work status field boolean
 
 
 def validate_code(code):
     try:
-        return DownloadCode.objects.get(pk__iexact=code, batch__work__status=1) # TODO also filter by "max_uses equals 0 OR times_used < max_uses subquery"
+        return DownloadCode.objects.get(pk__iexact=code, batch__work__published=True)  # TODO also filter by "max_uses equals 0 OR times_used < max_uses subquery"
     except DownloadCode.DoesNotExist as e:
         return False
 
@@ -79,7 +79,6 @@ class DownloadableWork(BuskerModel):
     """
     Represents an asset that can be downloaded by redeeming a DownloadCode object.
     """
-    STATUS_CHOICES = ((1, "Published"), (0, "Draft"))
     title = models.CharField(max_length=255,
                              help_text="The title of the work.")
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
@@ -88,8 +87,8 @@ class DownloadableWork(BuskerModel):
                               upload_to=work_image_path)
     thumbnail = ImageSpecField(source='image', processors=[ResizeToFit(400, 400)], format='JPEG',
                                options={'quality': 85})
-    status = models.IntegerField(choices=STATUS_CHOICES, default=1,
-                                 help_text="Draft items will not be available for download.")
+    published = models.BooleanField(default=True,
+                                    help_text="DownloadCodes will NOT work if their DownloadableWork is not published.")
 
     def __str__(self):
         return self.title
@@ -107,8 +106,12 @@ class File(BuskerModel):
     file = models.FileField(upload_to=work_file_path)
     work = models.ForeignKey(DownloadableWork, on_delete=models.CASCADE)
 
+    @property
+    def filename(self):
+        return os.path.basename(self.file.name)
+
     def __str__(self):
-        return self.file
+        return self.file.name
 
 
 class Batch(BuskerModel):

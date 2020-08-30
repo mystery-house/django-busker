@@ -6,18 +6,19 @@ from .models import *
 # TODO on Artist admin page, display related works
 # TODO on Works admin page, display related files and batches
 # TODO on Batches page, display related download codes
-# TODO create "download CSV" / "download excel" / "download QR codes" actions for the batches page
+# TODO make codes, batches, works filterable by artist and other related fields
 
 
 class BatchAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'private_note', 'work_status')
+    list_display = ('__str__', 'private_note', 'work_published')
     actions = ['download_as_csv',]
 
-    def work_status(self, instance):
+    def work_published(self, instance):
         """
         Admin list view callback to display the status of this batch's DownloadableWork
         """
-        return instance.work.status
+        return instance.work.published
+    work_published.boolean = True
 
     def download_as_csv(self, request, queryset):
         """
@@ -29,15 +30,20 @@ class BatchAdmin(admin.ModelAdmin):
     download_as_csv.short_description = "Export Download Codes for selected batches as CSV"
 
 
+class DownloadableWorkAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'published')
+
+
 class DownloadCodeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'batch', 'max_uses', 'times_used', 'work_status')
+    list_display = ('id', 'batch', 'max_uses', 'times_used', 'work_published')
     actions = ['download_as_csv',]
 
-    def work_status(self, instance):
+    def work_published(self, instance):
         """
         Admin list view callback to display the status of this code's DownloadableWork
         """
-        return instance.batch.work.status
+        return instance.batch.work.published
+    work_published.boolean = True
 
     def download_as_csv(self, request, queryset):
         """
@@ -49,6 +55,6 @@ class DownloadCodeAdmin(admin.ModelAdmin):
 
 admin.site.register(File)
 admin.site.register(DownloadCode, DownloadCodeAdmin)
-admin.site.register(DownloadableWork)
+admin.site.register(DownloadableWork, DownloadableWorkAdmin)
 admin.site.register(Artist)
 admin.site.register(Batch, BatchAdmin)

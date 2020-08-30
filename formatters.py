@@ -9,7 +9,6 @@ def format_codes_csv(query_set):
     """
     Given a QuerySet of DownloadCode objects, format it as a CSV file. Returns an HttpResponse object containing a
     CSV file as an attachment.
-    TODO: Would be nice to be able to include the URI and/or full URL, remaining_uses per code
     """
     header_map = {
         'id': 'download_code',
@@ -27,7 +26,6 @@ def format_codes_csv(query_set):
     serializer_map = {
         'created_date': (lambda x: x.strftime('%Y/%m/%d')),
         'batch__created_date': (lambda x: x.strftime('%Y/%m/%d')),
-
     }
 
     return render_to_csv_response(query_set.values('id', 'created_date', 'batch__work__artist__name',

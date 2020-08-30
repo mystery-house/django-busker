@@ -1,4 +1,6 @@
 from datetime import datetime
+from secrets import token_hex
+
 from django.http import HttpResponse, Http404
 from django.shortcuts import render
 from django.urls import reverse
@@ -6,6 +8,9 @@ from django.views.generic import View, FormView
 import magic
 from .forms import RedeemCodeForm, ConfirmForm
 from .models import DownloadCode, File, validate_code
+
+
+# TODO custom 404 view using base.html for this app https://stackoverflow.com/a/35110595/3280582
 
 
 class RedeemView(FormView):
@@ -39,18 +44,28 @@ class RedeemView(FormView):
         """
         Once the form has been submitted, increment the usage count and display the list of downloadable files.
         """
-        code = DownloadCode.objects.get(id=form.cleaned_data['code'], batch__work__status=1)
+        code = DownloadCode.objects.get(id=form.cleaned_data['code'], batch__work__published=True)
         code.times_used = code.times_used + 1
         code.last_used_date = datetime.now()
         code.save()
+        # Save a token in the session which will subsequently be used to validate download links:
+        self.request.session['busker_download_token'] = token_hex(16)
+        self.request.session.modified = True
 
         context = self.get_context_data()
         context['code'] = code
         return render(self.request, 'busker/file_list.html', context=context)
 
 
-class DownloadView(View):  # TODO validate against a token set in the session
+class DownloadView(View):
+    # TODO document requirement of 'django.core.context_processors.request' middleware
+
     def get(self, request, *args, **kwargs):
+        if 'busker_download_token' not in request.session \
+                or request.GET.get('t') != request.session['busker_download_token']:
+            # TODO: render 401 in template, improve message
+            return HttpResponse("You don't have permission to do that.", status=401)
+
         file = File.objects.get(id=kwargs['file_id'])
         mime = magic.Magic(mime=True)
 
