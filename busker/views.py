@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 from secrets import token_hex
 
 from django.http import HttpResponse, Http404
@@ -58,8 +59,9 @@ class RedeemView(FormView):
 
 
 class DownloadView(View):
-    # TODO document requirement of 'django.core.context_processors.request' middleware
-
+    """
+    Handles the actual downloading of files.
+    """
     def get(self, request, *args, **kwargs):
         if 'busker_download_token' not in request.session \
                 or request.GET.get('t') != request.session['busker_download_token']:
@@ -68,9 +70,10 @@ class DownloadView(View):
 
         file = File.objects.get(id=kwargs['file_id'])
         mime = magic.Magic(mime=True)
+        filename = os.path.basename(file.file.path)
 
         response = HttpResponse(file.file, content_type=mime.from_file(file.file.path))
-        response['Content-Disposition'] = f'attachment; filename="{file.file.name}"'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
         response['Content-Length'] = file.file.size
         return response
 
