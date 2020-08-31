@@ -31,6 +31,8 @@ Next, add busker's URLs to your Django project's main ``urls.py`` module::
 
 (The first argument to ``path()`` can be whatever you like, but make sure ``namespace`` is set to ``'busker'``.
 
+For uploaded images to display correctly you also will need ``MEDIA_ROOT`` and ``MEDIA_URL`` configured in your ``settings.py`` module. (See <https://docs.djangoproject.com/en/3.1/howto/static-files/> for a way to tweak your project ``urls.py`` to serve media when developing locally.)
+
 Finally, in the terminal, run busker's migrations from the top level of the Django project::
 
   python manage.my migrate busker
