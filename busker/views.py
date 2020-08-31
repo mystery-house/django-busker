@@ -59,8 +59,9 @@ class RedeemView(FormView):
 
 
 class DownloadView(View):
-    # TODO document requirement of 'django.core.context_processors.request' middleware
-
+    """
+    Handles the actual downloading of files.
+    """
     def get(self, request, *args, **kwargs):
         if 'busker_download_token' not in request.session \
                 or request.GET.get('t') != request.session['busker_download_token']:
