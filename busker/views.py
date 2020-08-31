@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 from secrets import token_hex
 
 from django.http import HttpResponse, Http404
@@ -68,9 +69,10 @@ class DownloadView(View):
 
         file = File.objects.get(id=kwargs['file_id'])
         mime = magic.Magic(mime=True)
+        filename = os.path.basename(file.file.path)
 
         response = HttpResponse(file.file, content_type=mime.from_file(file.file.path))
-        response['Content-Disposition'] = f'attachment; filename="{file.file.name}"'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
         response['Content-Length'] = file.file.size
         return response
 
