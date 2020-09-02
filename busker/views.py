@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 import os
 from secrets import token_hex
 
@@ -9,9 +10,10 @@ from django.views.generic import View, FormView
 import magic
 from .forms import RedeemCodeForm, ConfirmForm
 from .models import DownloadCode, File, validate_code
-
+from .util import log_activity
 
 # TODO custom 404 view using base.html for this app https://stackoverflow.com/a/35110595/3280582
+logger = logging.getLogger(__name__)
 
 
 class RedeemView(FormView):
@@ -52,7 +54,7 @@ class RedeemView(FormView):
         # Save a token in the session which will subsequently be used to validate download links:
         self.request.session['busker_download_token'] = token_hex(16)
         self.request.session.modified = True
-
+        log_activity(logger, code, "Code Redeemed", self.request)
         context = self.get_context_data()
         context['code'] = code
         return render(self.request, 'busker/file_list.html', context=context)
@@ -69,9 +71,10 @@ class DownloadView(View):
             return HttpResponse("You don't have permission to do that.", status=401)
 
         file = File.objects.get(id=kwargs['file_id'])
+        log_activity(logger, file, "File Downloaded", self.request)
+
         mime = magic.Magic(mime=True)
         filename = os.path.basename(file.file.path)
-
         response = HttpResponse(file.file, content_type=mime.from_file(file.file.path))
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         response['Content-Length'] = file.file.size
