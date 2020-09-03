@@ -10,6 +10,7 @@ from django.views.generic import View, FormView
 import magic
 from .forms import RedeemCodeForm, ConfirmForm
 from .models import DownloadCode, File, validate_code
+from .signals import code_post_redeem, file_pre_download
 from .util import log_activity
 
 # TODO custom 404 view using base.html for this app https://stackoverflow.com/a/35110595/3280582
@@ -57,6 +58,7 @@ class RedeemView(FormView):
         log_activity(logger, code, "Code Redeemed", self.request)
         context = self.get_context_data()
         context['code'] = code
+        code_post_redeem.send(sender=self.__class__, request=self.request, code=code)
         return render(self.request, 'busker/file_list.html', context=context)
 
 
@@ -75,6 +77,7 @@ class DownloadView(View):
 
         mime = magic.Magic(mime=True)
         filename = os.path.basename(file.file.path)
+        file_pre_download.send(sender=self.__class__, request=self.request, file=file)
         response = HttpResponse(file.file, content_type=mime.from_file(file.file.path))
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         response['Content-Length'] = file.file.size

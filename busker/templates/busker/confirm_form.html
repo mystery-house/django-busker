@@ -9,8 +9,8 @@
 <h2>Redeem Code</h2>
 {% endif %}
     {% if code.batch.work.image %}
-        <div class="busker-thumbnail">
-            <img src="{{ code.batch.work.thumbnail.url }}" alt="{{ code.batch.work.title }}">
+<div class="busker-thumbnail">
+        <img src="{{ code.batch.work.thumbnail.url }}" alt="{{ code.batch.work.title }}">
         </div>
     {% endif %}
 <form action="{% url 'busker:redeem' form.code.value %}" method="POST">
@@ -20,7 +20,11 @@
     {% elif code.remaining_uses > 0 %}
         <p>This code has {{ code.remaining_uses }} use{{ code.remaining_uses|pluralize }} left.</p>
         {{ form.as_p }}
-        <input type="submit" value="Continue">
+	{% if code.batch.public_message %}
+	{{ code.batch.public_message_rendered|safe }}
+	{% endif %}
+
+	<input type="submit" value="Continue">
     {% else %}
         This code has already been used.
     {% endif %}

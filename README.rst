@@ -33,6 +33,8 @@ Next, add busker's URLs to your Django project's main ``urls.py`` module::
 
 For uploaded images to display correctly you also will need ``MEDIA_ROOT`` and ``MEDIA_URL`` configured in your ``settings.py`` module. (See <https://docs.djangoproject.com/en/3.1/howto/static-files/> for a way to tweak your project ``urls.py`` to serve media when developing locally.)
 
+When deploying to production, you'll need to run the ``collectstatic`` admin command.
+
 Finally, in the terminal, run busker's migrations from the top level of the Django project::
 
   python manage.my migrate busker
@@ -52,7 +54,7 @@ Represents an artist/creator.
 DownloadableWork
 ----------------
 
-Represents an item that will be accessible to people with valid download codes; for example, an music album or EP.
+Represents an item that will be accessible to people with valid download codes; for example, a zip file containing an album of music. (Or, several zip files of the same album in different formats.)
 
 File
 ----
@@ -68,3 +70,13 @@ DownloadCode
 ------------
 
 DownloadCode objects represent the actual codes users can use to access files. They're generally auto-created when a new Batch is saved. Note the 'export csv' option in the DownloadCode admin view.
+
+Signals
+=======
+Busker provides the following signals which may be useful:
+
+``busker.signals.code_post_redeem(sender, request, code)``
+This signal is sent whenever a DownloadCode is redeemed, *after* its ``times_used`` and ``last_used_date`` fields have been updated but *before* the user is presented with the download page. It sends the `request` object and the `DownloadCode` object being redeemed. 
+
+``busker.signals.file_pre_download(sender, request, file)``
+This signal is sent whenever a user clicks on a link to download a file, *after* the File object has been loaded but *before* the file is actually sent to the client. It sends the `request` object and the `File` object being redeemed.
