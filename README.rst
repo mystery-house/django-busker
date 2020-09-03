@@ -70,3 +70,13 @@ DownloadCode
 ------------
 
 DownloadCode objects represent the actual codes users can use to access files. They're generally auto-created when a new Batch is saved. Note the 'export csv' option in the DownloadCode admin view.
+
+Signals
+=======
+Busker provides the following signals which may be useful:
+
+``busker.signals.code_post_redeem(sender, request, code)``
+This signal is sent whenever a DownloadCode is redeemed, *after* its ``times_used`` and ``last_used_date`` fields have been updated but *before* the user is presented with the download page. It sends the `request` object and the `DownloadCode` object being redeemed. 
+
+``busker.signals.file_pre_download(sender, request, file)``
+This signal is sent whenever a user clicks on a link to download a file, *after* the File object has been loaded but *before* the file is actually sent to the client. It sends the `request` object and the `File` object being redeemed.
