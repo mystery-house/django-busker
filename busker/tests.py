@@ -1,12 +1,11 @@
 import os
 import tempfile
-from uuid import uuid4
 
+from PIL import Image
 from django.core.files import File
 from django.test import TestCase
-from PIL import Image
 
-from .models import Artist, File as BuskerFile, DownloadableWork, DownloadCode, Batch, work_file_path, work_image_path
+from .models import Artist, File as BuskerFile, DownloadCode, DownloadableWork, Batch, work_file_path, work_image_path, validate_code, generate_code
 
 
 # Create your tests here.
@@ -69,3 +68,25 @@ class BuskerTestCase(TestCase):
                           expected_path,
                           "BuskerFile upload paths should use the format `busker/files/[busker file object id]/["
                           "uploaded img file name]`")
+
+    def test_validate_code(self):
+        """
+        Tests expected behavior of the models.validate_code() method.
+        """
+        code = self.batch.codes.first()
+
+        self.assertEqual(validate_code(code), code, f"validate_code should have returned the DownloadCode instance "
+                                                    f"with an id of `{code.id}`")
+
+        self.assertEqual(validate_code("This is definitely not a valid code"), False, f"validate_code should return "
+                                                                                      f"boolean False when given an "
+                                                                                      f"invalid code.")
+
+    def test_generate_code(self):
+        """
+        Verifies that a sampling of codes returned by models.generate_code do not exist in the database.
+        """
+        for i in range(0, 100):
+            code = generate_code()
+            with self.assertRaises(DownloadCode.DoesNotExist):
+                DownloadCode.objects.get(pk=code)
