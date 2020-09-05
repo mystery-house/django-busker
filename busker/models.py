@@ -128,7 +128,7 @@ class Batch(BuskerModel):
     public_message_rendered = RenderedMarkdownField()
     number_of_codes = models.IntegerField(help_text="The number of Download Codes to be generated with this batch. "
                                                     "(Additional codes may be added to the batch later.)",
-                                          default="100")  # TODO place an upper limit?
+                                          default=100)  # TODO place an upper limit?
     max_uses = models.IntegerField(help_text="The number of times this code can be used. (You may subsequently change "
                                              "this amount on individual codes, but this will be used as the initial "
                                              "value.) "
