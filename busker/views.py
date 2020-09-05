@@ -11,9 +11,8 @@ import magic
 from .forms import RedeemCodeForm, ConfirmForm
 from .models import DownloadCode, File, validate_code
 from .signals import code_post_redeem, file_pre_download
-from .util import log_activity
+from .util import error_page, log_activity
 
-# TODO custom 404 view using base.html for this app https://stackoverflow.com/a/35110595/3280582
 logger = logging.getLogger(__name__)
 
 
@@ -31,7 +30,8 @@ class RedeemView(FormView):
         """
         self.code = validate_code(kwargs['download_code'])
         if not self.code:
-            raise Http404(f"The code {kwargs['download_code']} has already been redeemed or is not valid.")
+            return error_page(self.request, 404, "Invalid Code",
+                              f"The code {kwargs['download_code']} has already been redeemed or is not valid.")
         return self.render_to_response(self.get_context_data())
 
     def get_initial(self):
@@ -69,8 +69,7 @@ class DownloadView(View):
     def get(self, request, *args, **kwargs):
         if 'busker_download_token' not in request.session \
                 or request.GET.get('t') != request.session['busker_download_token']:
-            # TODO: render 401 in template, improve message
-            return HttpResponse("You don't have permission to do that.", status=401)
+            return error_page(request, 401, "Unauthorized", "You do not have permission to access this resource.")
 
         file = File.objects.get(id=kwargs['file_id'])
         log_activity(logger, file, "File Downloaded", self.request)

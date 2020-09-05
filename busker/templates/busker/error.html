@@ -1,0 +1,7 @@
+{% extends "busker/base.html" %} {# Use this template to display HTML errors #}
+{% load i18n %}
+{% block html_title %}{% trans "Error:" %} {{ title }} ({{ status }}){% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+    {{ message }}
+{% endblock %}
