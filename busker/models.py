@@ -149,7 +149,7 @@ class DownloadCode(BuskerModel):
     """
     # TODO validate ID to ensure uppercase and 0-9 only?
     id = models.CharField(primary_key=True, max_length=7, default=generate_code)
-    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='codes')
     max_uses = models.IntegerField(default=3, help_text="This is typically initially determined when a Batch is "
                                                         "originally created, but can be overridden.")
     times_used = models.IntegerField(default=0)
@@ -172,6 +172,9 @@ class DownloadCode(BuskerModel):
 
     def __str__(self):
         return self.id
+
+    class Meta:
+        ordering = ['id']
 
 
 @receiver(post_save, sender=Batch)
