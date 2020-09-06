@@ -8,10 +8,14 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
+from django.utils import timezone
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFit
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
+
+from .signals import code_post_redeem
+
 
 # TODO S3 storage
 
@@ -111,7 +115,7 @@ class File(BuskerModel):
     description = models.CharField(max_length=255,
                                    help_text="A brief description of the file (I.E., \"High-quality 320Kbps MP3\", etc.")
     file = models.FileField(upload_to=work_file_path)
-    work = models.ForeignKey(DownloadableWork, on_delete=models.CASCADE)
+    work = models.ForeignKey(DownloadableWork, on_delete=models.CASCADE, related_name='files')
 
     @property
     def filename(self):
@@ -177,6 +181,15 @@ class DownloadCode(BuskerModel):
         an absolute URL without a request object.)
         """
         return reverse('busker:redeem', kwargs={'download_code': self.id} )
+
+    def redeem(self, request=None):
+        """
+        Increments the times_used() count and sends the code_post_redeem signal.
+        """
+        self.times_used += 1
+        self.last_used_date = timezone.now()
+        self.save()
+        code_post_redeem.send(sender=self.__class__, request=request, code=self)
 
     def __str__(self):
         return self.id

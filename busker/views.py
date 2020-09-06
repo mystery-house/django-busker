@@ -29,7 +29,7 @@ class RedeemView(FormView):
         Validates the code provided as URL argument
         """
         self.code = validate_code(kwargs['download_code'])
-        if not self.code:
+        if not self.code:  # TODO instead of 404, use messages to display error and redirect to the redeem form view
             return error_page(self.request, 404, "Invalid Code",
                               f"The code {kwargs['download_code']} has already been redeemed or is not valid.")
         return self.render_to_response(self.get_context_data())
@@ -49,16 +49,13 @@ class RedeemView(FormView):
         Once the form has been submitted, increment the usage count and display the list of downloadable files.
         """
         code = DownloadCode.objects.get(id=form.cleaned_data['code'], batch__work__published=True)
-        code.times_used = code.times_used + 1
-        code.last_used_date = datetime.now()
-        code.save()
+        code.redeem(request=self.request)
         # Save a token in the session which will subsequently be used to validate download links:
         self.request.session['busker_download_token'] = token_hex(16)
         self.request.session.modified = True
         log_activity(logger, code, "Code Redeemed", self.request)
         context = self.get_context_data()
         context['code'] = code
-        code_post_redeem.send(sender=self.__class__, request=self.request, code=code)
         return render(self.request, 'busker/file_list.html', context=context)
 
 

@@ -5,7 +5,7 @@
 <h2>{{ code.batch.work.artist.name }} - {{ code.batch.work.title }}</h2>
 <table>
     <tbody>
-    {% for file in code.batch.work.file_set.all %}
+    {% for file in code.batch.work.files.all %}
         <tr>
             <td><a href="{% url 'busker:download' file.id %}?t={{ request.session.busker_download_token }}">{{ file.filename }}</a></td>
             <td>{{ file.description }}</td>
