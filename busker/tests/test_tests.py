@@ -79,7 +79,7 @@ class BuskerTestCase(TestCase):
         Tests expected behavior of the models.validate_code() method.
         """
         code = self.batch.codes.first()
-
+        # TODO test various conditions (code already used, work is not published)
         self.assertEqual(validate_code(code), code, f"validate_code should have returned the DownloadCode instance "
                                                     f"with an id of `{code.id}`")
 
