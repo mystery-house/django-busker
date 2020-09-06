@@ -17,8 +17,16 @@ from markdownfield.validators import VALIDATOR_STANDARD
 
 
 def validate_code(code):
+    """
+    Case-insensitive validation of a download code using the following criteria:
+    - code matches the pk of an existing DownloadCode object
+    - The code's max_uses value is 0 (unlimited) OR its times_used value is less than its max_uses value
+    - The 'published' flag for the work this code is related to is True
+    """
     try:
-        return DownloadCode.objects.get(pk__iexact=code, batch__work__published=True)  # TODO also filter by "max_uses equals 0 OR times_used < max_uses subquery"
+        return DownloadCode.objects.get(models.Q(max_uses=0) | models.Q(times_used__lt=models.F('max_uses')),
+                                        pk__iexact=code,
+                                        batch__work__published=True)
     except DownloadCode.DoesNotExist as e:
         return False
 
