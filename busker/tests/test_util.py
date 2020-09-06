@@ -32,6 +32,7 @@ class UtilTestCase(TestCase):
         test_title = "I'm a teapot"
         test_message = "may be short and stout"
 
+        # (request is arbitrary, we just need something to pass to error_page)
         request = self.factory.get(reverse('busker:redeem', kwargs={'download_code': 'no_such_code'}))
         response = error_page(request, test_status, test_title, test_message)
         self.assertContains(response, escape(test_title), status_code=test_status)
