@@ -43,4 +43,4 @@ def error_page(request, status, title, message):
     Given an HTTP status code, page title, and error message, returns a rendered HttpResponse object.
     """
     context = {'status': status, 'title': title, 'message': message}
-    return HttpResponse(render(request, 'busker/error.html', context=context, status=status))
+    return HttpResponse(render(request, 'busker/error.html', context=context), status=status)
