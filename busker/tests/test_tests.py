@@ -1,11 +1,16 @@
 import os
+from random import randint
 import tempfile
 
 from PIL import Image
 from django.core.files import File
 from django.test import TestCase
+from django.test.client import RequestFactory
+from django.urls import reverse
 
-from .models import Artist, File as BuskerFile, DownloadCode, DownloadableWork, Batch, work_file_path, work_image_path, validate_code, generate_code
+from busker.models import Artist, File as BuskerFile, DownloadCode, DownloadableWork, Batch, work_file_path, work_image_path, \
+    validate_code, generate_code
+from busker.util import get_client_ip, error_page
 
 
 # Create your tests here.
@@ -34,12 +39,12 @@ class BuskerTestCase(TestCase):
         self.busker_file.file.save(name=self.img2_basename, content=self.img2_file)
         self.busker_file.save()
         self.batch = Batch.objects.create(
-                                     work=self.work,
-                                     label="Conrad Poohs Test Batch",
-                                     private_note="Batch for unit testing",
-                                     public_message="#Thank You\nThis is a message with *markdown* **formatting**.",
-                                     number_of_codes=10
-                                     )
+            work=self.work,
+            label="Conrad Poohs Test Batch",
+            private_note="Batch for unit testing",
+            public_message="#Thank You\nThis is a message with *markdown* **formatting**.",
+            number_of_codes=10
+        )
 
     def tearDown(self):
         os.unlink(self.img_file.name)
@@ -90,3 +95,42 @@ class BuskerTestCase(TestCase):
             code = generate_code()
             with self.assertRaises(DownloadCode.DoesNotExist):
                 DownloadCode.objects.get(pk=code)
+
+    def test_artist_str(self):
+        self.assertEqual(self.artist.__str__(), self.artist.name, "Artist.__str__() should return the value of the "
+                                                                  "name field.")
+
+    def test_downloadable_work_str(self):
+        self.assertEqual(self.work.__str__(), self.work.title, "DownloadableWork.__str__() should return the value of "
+                                                               "the title field")
+
+    def test_busker_file_str(self):
+        self.assertEqual(self.busker_file.__str__(), os.path.basename(self.busker_file.file.name),
+                         "BuskerFile.__str__() "
+                         "should return the base "
+                         "value of the file attached "
+                         "to the 'file' field")
+
+    def test_busker_filename(self):
+        self.assertEqual(self.busker_file.filename, os.path.basename(self.busker_file.file.name),
+                         "BuskerFile.filename() "
+                         "should return the base "
+                         "value of the file attached "
+                         "to the 'file' field")
+
+    def test_batch_str(self):
+        expected_value = f"{self.batch.label} -- {self.batch.work.title} by {self.batch.work.artist.name}"
+        self.assertEqual(self.batch.__str__(), expected_value, "Batch.__str__() should follow the pattern {label} -- "
+                                                               "{work.title} by {work.artist.name}")
+
+    def test_code_remaining_uses(self):
+        used = randint(0, 10)
+        code = DownloadCode.objects.create(batch=self.batch, max_uses=10, times_used=used)
+        self.assertEqual(code.remaining_uses, 10 - used,
+                         "DownloadCode.remaining_uses should return the value of max_uses minus times_used")
+        code.delete()
+
+    def test_code_redeem_uri(self):
+        code = DownloadCode.objects.create(batch=self.batch)
+        self.assertEqual(code.redeem_uri, reverse('busker:redeem', kwargs={'download_code': code.id}))
+        code.delete()
