@@ -62,7 +62,7 @@ class RedeemViewTest(TestCase):
         """
         Test the redeem URL with a valid code; should respond with the confirm form
         """
-        code = DownloadCode.objects.first()
+        code = self.batch.codes.first()
         response = self.client.get(reverse('busker:redeem', kwargs={'download_code': code.id}),
                                    HTTP_USER_AGENT=__name__)
         # TODO support i18n for button label
@@ -150,8 +150,8 @@ class RedeemFormViewTest(TestCase):
         """
         Test expected behavior when submitting the RedeemFormView with valid code (redirects to RedeemView with 302)
         """
-        code = DownloadCode.objects.first()
-        data = {'code': code.id}
+        code = DownloadCode.objects.create(batch=self.batch, max_uses=3)
+        data = {'code': code.id, 'submit': 'Redeem Code'}  # TODO make sure submit value is i18n friendly
         response = self.client.post(reverse('busker:redeem_form'), data=data, follow=True)
         self.assertRedirects(response, reverse('busker:redeem', kwargs={'download_code': code.id}))
 
