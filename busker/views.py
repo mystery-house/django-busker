@@ -6,7 +6,9 @@ from secrets import token_hex
 from django.http import HttpResponse, Http404
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import View, FormView
+
 import magic
 from .forms import RedeemCodeForm, ConfirmForm
 from .models import DownloadCode, File, validate_code
@@ -68,7 +70,10 @@ class DownloadView(View):
                 or request.GET.get('t') != request.session['busker_download_token']:
             return error_page(request, 401, "Unauthorized", "You do not have permission to access this resource.")
 
-        file = File.objects.get(id=kwargs['file_id'])
+        try:
+            file = File.objects.get(id=kwargs['file_id'])
+        except File.DoesNotExist:
+            return error_page(self.request, 404, "No Such File", "The file you requested does not exist.")
         log_activity(logger, file, "File Downloaded", self.request)
 
         mime = magic.Magic(mime=True)
