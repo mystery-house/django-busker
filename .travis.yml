@@ -13,6 +13,5 @@ script:
 
 branches:
   only:
-    - feature/travis
     - dev
     - master
