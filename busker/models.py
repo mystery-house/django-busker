@@ -8,17 +8,29 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
+from django.utils import timezone
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFit
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
 
+from .signals import code_post_redeem
+
+
 # TODO S3 storage
 
 
 def validate_code(code):
+    """
+    Case-insensitive validation of a download code using the following criteria:
+    - code matches the pk of an existing DownloadCode object
+    - The code's max_uses value is 0 (unlimited) OR its times_used value is less than its max_uses value
+    - The 'published' flag for the work this code is related to is True
+    """
     try:
-        return DownloadCode.objects.get(pk__iexact=code, batch__work__published=True)  # TODO also filter by "max_uses equals 0 OR times_used < max_uses subquery"
+        return DownloadCode.objects.get(models.Q(max_uses=0) | models.Q(times_used__lt=models.F('max_uses')),
+                                        pk__iexact=code,
+                                        batch__work__published=True)
     except DownloadCode.DoesNotExist as e:
         return False
 
@@ -103,7 +115,7 @@ class File(BuskerModel):
     description = models.CharField(max_length=255,
                                    help_text="A brief description of the file (I.E., \"High-quality 320Kbps MP3\", etc.")
     file = models.FileField(upload_to=work_file_path)
-    work = models.ForeignKey(DownloadableWork, on_delete=models.CASCADE)
+    work = models.ForeignKey(DownloadableWork, on_delete=models.CASCADE, related_name='files')
 
     @property
     def filename(self):
@@ -128,7 +140,7 @@ class Batch(BuskerModel):
     public_message_rendered = RenderedMarkdownField()
     number_of_codes = models.IntegerField(help_text="The number of Download Codes to be generated with this batch. "
                                                     "(Additional codes may be added to the batch later.)",
-                                          default="100")  # TODO place an upper limit?
+                                          default=100)  # TODO place an upper limit?
     max_uses = models.IntegerField(help_text="The number of times this code can be used. (You may subsequently change "
                                              "this amount on individual codes, but this will be used as the initial "
                                              "value.) "
@@ -149,7 +161,7 @@ class DownloadCode(BuskerModel):
     """
     # TODO validate ID to ensure uppercase and 0-9 only?
     id = models.CharField(primary_key=True, max_length=7, default=generate_code)
-    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='codes')
     max_uses = models.IntegerField(default=3, help_text="This is typically initially determined when a Batch is "
                                                         "originally created, but can be overridden.")
     times_used = models.IntegerField(default=0)
@@ -170,8 +182,20 @@ class DownloadCode(BuskerModel):
         """
         return reverse('busker:redeem', kwargs={'download_code': self.id} )
 
+    def redeem(self, request=None):
+        """
+        Increments the times_used() count and sends the code_post_redeem signal.
+        """
+        self.times_used += 1
+        self.last_used_date = timezone.now()
+        self.save()
+        code_post_redeem.send(sender=self.__class__, request=request, code=self)
+
     def __str__(self):
         return self.id
+
+    class Meta:
+        ordering = ['id']
 
 
 @receiver(post_save, sender=Batch)

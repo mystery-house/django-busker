@@ -2,6 +2,8 @@
 Contains various utility functions used by the busker app.
 """
 from logging import INFO
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.utils import timezone
 
 
@@ -29,8 +31,21 @@ def log_activity(logger, obj, message, request, level=INFO):
 
     *In the case of DownloadCode objects, the ID and object-as-string will be the same.
     """
+    try:
+        user_agent = request.META['HTTP_USER_AGENT']
+    except KeyError:
+        user_agent = 'Unavailable'
+
     logger.log(
         level,
         f"[{timezone.now().strftime('%d/%b/%Y:%H:%M:%S')}]\t{message}\t{str(obj)}\t{obj.pk}\t"
-        f"{get_client_ip(request)}\t{request.META['HTTP_USER_AGENT']}"
+        f"{get_client_ip(request)}\t{user_agent}"
     )
+
+
+def error_page(request, status, title, message):
+    """
+    Given an HTTP status code, page title, and error message, returns a rendered HttpResponse object.
+    """
+    context = {'status': status, 'title': title, 'message': message}
+    return HttpResponse(render(request, 'busker/error.html', context=context), status=status)

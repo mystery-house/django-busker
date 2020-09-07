@@ -6,14 +6,15 @@ from secrets import token_hex
 from django.http import HttpResponse, Http404
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import View, FormView
+
 import magic
 from .forms import RedeemCodeForm, ConfirmForm
 from .models import DownloadCode, File, validate_code
 from .signals import code_post_redeem, file_pre_download
-from .util import log_activity
+from .util import error_page, log_activity
 
-# TODO custom 404 view using base.html for this app https://stackoverflow.com/a/35110595/3280582
 logger = logging.getLogger(__name__)
 
 
@@ -30,8 +31,9 @@ class RedeemView(FormView):
         Validates the code provided as URL argument
         """
         self.code = validate_code(kwargs['download_code'])
-        if not self.code:
-            raise Http404(f"The code {kwargs['download_code']} has already been redeemed or is not valid.")
+        if not self.code:  # TODO instead of 404, use messages to display error and redirect to the redeem form view
+            return error_page(self.request, 404, "Invalid Code",
+                              f"The code {kwargs['download_code']} has already been redeemed or is not valid.")
         return self.render_to_response(self.get_context_data())
 
     def get_initial(self):
@@ -49,16 +51,13 @@ class RedeemView(FormView):
         Once the form has been submitted, increment the usage count and display the list of downloadable files.
         """
         code = DownloadCode.objects.get(id=form.cleaned_data['code'], batch__work__published=True)
-        code.times_used = code.times_used + 1
-        code.last_used_date = datetime.now()
-        code.save()
+        code.redeem(request=self.request)
         # Save a token in the session which will subsequently be used to validate download links:
         self.request.session['busker_download_token'] = token_hex(16)
         self.request.session.modified = True
         log_activity(logger, code, "Code Redeemed", self.request)
         context = self.get_context_data()
         context['code'] = code
-        code_post_redeem.send(sender=self.__class__, request=self.request, code=code)
         return render(self.request, 'busker/file_list.html', context=context)
 
 
@@ -69,10 +68,12 @@ class DownloadView(View):
     def get(self, request, *args, **kwargs):
         if 'busker_download_token' not in request.session \
                 or request.GET.get('t') != request.session['busker_download_token']:
-            # TODO: render 401 in template, improve message
-            return HttpResponse("You don't have permission to do that.", status=401)
+            return error_page(request, 401, "Unauthorized", "You do not have permission to access this resource.")
 
-        file = File.objects.get(id=kwargs['file_id'])
+        try:
+            file = File.objects.get(id=kwargs['file_id'])
+        except File.DoesNotExist:
+            return error_page(self.request, 404, "No Such File", "The file you requested does not exist.")
         log_activity(logger, file, "File Downloaded", self.request)
 
         mime = magic.Magic(mime=True)

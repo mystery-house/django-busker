@@ -130,3 +130,9 @@ dmypy.json
 
 ._*
 .idea
+
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
