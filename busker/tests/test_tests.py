@@ -13,6 +13,8 @@ from busker.models import Artist, File as BuskerFile, DownloadCode, Downloadable
 from busker.util import get_client_ip, error_page
 
 
+# TODO split into per-model TestCase classes, review setUp redundancies
+
 # Create your tests here.
 class BuskerTestCase(TestCase):
 
