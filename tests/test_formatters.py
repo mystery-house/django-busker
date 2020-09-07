@@ -1,21 +1,13 @@
 import os
-from random import randint
 import tempfile
 
 from PIL import Image
 from django.core.files import File
 from django.http import StreamingHttpResponse
-from django.test.client import RequestFactory
-from django.urls import reverse
-
-from busker.models import Artist, File as BuskerFile, DownloadCode, DownloadableWork, Batch, work_file_path, work_image_path, \
-    validate_code, generate_code
-from busker.util import get_client_ip, error_page
 from django.test import TestCase
-from django.test.client import RequestFactory
 
 from busker.formatters import format_codes_csv
-from busker.models import DownloadCode
+from busker.models import Artist, File as BuskerFile, DownloadableWork, Batch, DownloadCode
 
 
 class FormattersTestCase(TestCase):

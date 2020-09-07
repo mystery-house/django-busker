@@ -1,5 +1,4 @@
 import os
-from random import randint
 import tempfile
 
 from PIL import Image
@@ -7,13 +6,10 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.files import File
 from django.test import TestCase
-from django.test.client import RequestFactory
 from django.urls import reverse
 
 from busker.admin import BatchAdmin, DownloadCodeAdmin
-from busker.models import Artist, File as BuskerFile, DownloadCode, DownloadableWork, Batch, work_file_path, work_image_path, \
-    validate_code, generate_code
-from busker.util import get_client_ip, error_page
+from busker.models import Artist, File as BuskerFile, DownloadCode, DownloadableWork, Batch
 
 
 class BatchAdminTestCase(TestCase):
