@@ -55,10 +55,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'tests.urls'
 
-# STATICFILES_DIRS = [
-#     BASE_DIR / "www/static",
-# ]
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -124,11 +120,5 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
-#STATIC_ROOT = '/data/home/andy/Projects/magicians.band/www/static'
 STATIC_URL = '/static/'
-
-#MEDIA_ROOT = '/data/home/andy/Projects/magicians.band/www/media'
 MEDIA_URL = '/media/'
-
-
-IFTTT_WEBHOOKS_KEY = 'fake-ifttt-key'
