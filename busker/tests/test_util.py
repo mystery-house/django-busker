@@ -46,3 +46,15 @@ class UtilTestCase(TestCase):
 
         with self.assertLogs() as cm:
             log_activity(logger, code, "This is a test log entry", request, logging.INFO)
+
+    def test_log_activity_no_ua(self):
+        """
+        Test logging with no HTTP_USER_AGENT header
+        """
+        request = self.factory.get(reverse('busker:redeem_form'))
+        logger = logging.getLogger(__name__)
+
+        code = DownloadCode()
+
+        with self.assertLogs() as cm:
+            log_activity(logger, code, "This is a test log entry", request, logging.INFO)
