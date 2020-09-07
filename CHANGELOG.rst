@@ -2,6 +2,11 @@
 Changelog
 *********
 
+0.7.1
+#####
+* Refactor unit tests so they can be run without an existing django project (``python runtests.py``)
+* Add config for Travis-CI
+
 0.7.0
 #####
 * Nicely formatted error pages

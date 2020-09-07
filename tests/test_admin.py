@@ -19,6 +19,7 @@ from busker.util import get_client_ip, error_page
 class BatchAdminTestCase(TestCase):
 
     def setUp(self):
+
         # Create a couple of images to use for the downloadable work and BuskerFile objects
         self.img = Image.new("RGB", (1200, 1200), "#990000")
         self.img_file = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
