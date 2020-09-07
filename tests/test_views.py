@@ -64,7 +64,7 @@ class RedeemViewTest(TestCase):
         """
         Test the redeem URL with a valid code; should respond with the confirm form
         """
-        code = self.batch.codes.first()
+        code = DownloadCode.objects.create(batch=self.batch)
         response = self.client.get(reverse('busker:redeem', kwargs={'download_code': code.id}),
                                    HTTP_USER_AGENT=__name__)
         # TODO support i18n for button label
