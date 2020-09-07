@@ -13,10 +13,31 @@ Pre-requisites
 Installation
 ============
 
-From the top level of your checked-out copy of the busker repository, run::
+pip
+---
+To install the latest release of Busker with pip, use::
+
+  pip install git+https://github.com/tinpan-io/django-busker.git#egg=django_busker
+
+To install a specific tag with pip, use the following format::
+
+  pip install git+https://github.com/tinpan-io/django-busker.git@[tag]#egg=django_busker
+
+...where ``[tag]`` is the version you want to use; for example, to install version 0.7.0::
+
+  pip install git+https://github.com/tinpan-io/django-busker.git@0.7.0#egg=django_busker
+
+  
+Local
+-----
+To install from a checked out copy of the repository, ``cd`` into the top-level
+directory and run::
 
   python setup.py install
 
+  
+Django Setup
+=====
 Edit your Django ``settings.py`` module and add three new items to the ``INSTALLED_APPS`` list::
 
   'imagekit',
