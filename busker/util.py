@@ -31,10 +31,15 @@ def log_activity(logger, obj, message, request, level=INFO):
 
     *In the case of DownloadCode objects, the ID and object-as-string will be the same.
     """
+    try:
+        user_agent = request.META['HTTP_USER_AGENT']
+    except KeyError:
+        user_agent = 'Unavailable'
+
     logger.log(
         level,
         f"[{timezone.now().strftime('%d/%b/%Y:%H:%M:%S')}]\t{message}\t{str(obj)}\t{obj.pk}\t"
-        f"{get_client_ip(request)}\t{request.META['HTTP_USER_AGENT']}"
+        f"{get_client_ip(request)}\t{user_agent}"
     )
 
 
