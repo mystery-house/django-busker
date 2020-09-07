@@ -10,3 +10,9 @@ install:
 # command to run tests
 script:
   - python runtests.py
+
+branches:
+  only:
+    - feature/travis
+    - dev
+    - master
