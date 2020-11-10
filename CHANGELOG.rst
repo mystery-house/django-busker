@@ -2,6 +2,9 @@
 Changelog
 *********
 
+0.7.2
+* Add Python 3.9 to setup.cfg and .travis.yml
+
 0.7.1
 #####
 * Refactor unit tests so they can be run without an existing django project (``python runtests.py``)
