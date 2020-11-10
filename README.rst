@@ -4,6 +4,10 @@ Busker
 Busker is a Django app for managing and redeeming codes that allow end-users to download digital assets
 (Music, E-Books, High-resolution artwork, etc.)
 
+Demo
+====
+You can test-drive the code redemption workflow by visiting <https://magicians.band/download/> and entering the code `AM1FDEF` or by going directly to <https://magicians.band/download/redeem/AM1FDEF/>.
+
 Pre-requisites
 ==============
 
