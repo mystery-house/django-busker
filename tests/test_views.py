@@ -13,8 +13,6 @@ from busker.models import Artist, File as BuskerFile, DownloadableWork, Batch
 from busker.models import DownloadCode, generate_code
 
 # TODO: test signals https://www.freecodecamp.org/news/how-to-testing-django-signals-like-a-pro-c7ed74279311/
-# TODO standalone testing/travis config http://django-standalone-apps.com/part1/testing.html /
-#      https://github.com/byteweaver/django-forums/blob/master/runtests.py
 
 
 class RedeemViewTest(TestCase):
