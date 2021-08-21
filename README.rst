@@ -89,7 +89,7 @@ One or more File objects can be linked to a DownloadableWork
 Batch
 -----
 
-Batches automatically generate batches unique codes for a given DownloadableWork. Note the 'export csv' option in the Batch admin view.
+Batches automatically generate batches of unique codes for a given DownloadableWork. Note the 'export csv' option in the Batch admin view.
 
 DownloadCode
 ------------
