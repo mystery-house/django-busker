@@ -1,18 +1,14 @@
-from datetime import datetime
 import logging
 import os
 from secrets import token_hex
-
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
-from django.utils import timezone
 from django.views.generic import View, FormView
-
 import magic
 from .forms import RedeemCodeForm, ConfirmForm
 from .models import DownloadCode, File, validate_code
-from .signals import code_post_redeem, file_pre_download
+from .signals import file_pre_download
 from .util import error_page, log_activity
 
 logger = logging.getLogger(__name__)
