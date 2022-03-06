@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .formatters import format_codes_csv
-from .models import *
+from .models import DownloadableWork, DownloadCode, Artist, File, Batch
 
 # TODO create admin models, make 'user' field read-only and default to currently logged-in user
 # TODO on Artist admin page, display related works
@@ -11,7 +11,7 @@ from .models import *
 
 class BatchAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'private_note', 'work_published')
-    actions = ['download_as_csv',]
+    actions = ['download_as_csv']
 
     def work_published(self, instance):
         """
@@ -36,7 +36,7 @@ class DownloadableWorkAdmin(admin.ModelAdmin):
 
 class DownloadCodeAdmin(admin.ModelAdmin):
     list_display = ('id', 'batch', 'max_uses', 'times_used', 'work_published')
-    actions = ['download_as_csv',]
+    actions = ['download_as_csv']
 
     def work_published(self, instance):
         """
