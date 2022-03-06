@@ -2,7 +2,6 @@ import os
 import random
 import string
 from uuid import uuid4
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
@@ -31,7 +30,7 @@ def validate_code(code):
         return DownloadCode.objects.get(models.Q(max_uses=0) | models.Q(times_used__lt=models.F('max_uses')),
                                         pk__iexact=code,
                                         batch__work__published=True)
-    except DownloadCode.DoesNotExist as e:
+    except DownloadCode.DoesNotExist:
         return False
 
 
@@ -47,7 +46,7 @@ def generate_code():
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
         try:
             DownloadCode.objects.get(pk=code)
-        except DownloadCode.DoesNotExist as e:
+        except DownloadCode.DoesNotExist:
             new_code = code
     return new_code
 
@@ -180,7 +179,7 @@ class DownloadCode(BuskerModel):
         The URI that can be used to redeem this code. (Unfortunately there is no convenient way to build
         an absolute URL without a request object.)
         """
-        return reverse('busker:redeem', kwargs={'download_code': self.id} )
+        return reverse('busker:redeem', kwargs={'download_code': self.id})
 
     def redeem(self, request=None):
         """
