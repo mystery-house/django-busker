@@ -2,6 +2,19 @@
 Changelog
 *********
 
+0.7.5
+* Upgrade dependencies (includes a PILLOW security update)
+* Remove the now-broken provides_args keyword argument from calls to Signal()
+* Clean up imports
+* Use a temporary MEDIA_ROOT directory when running tests
+* Remove travis config file
+
+0.7.4
+* PILLOW security upgrade
+
+0.7.3
+* Dependency Upgrades
+
 0.7.2
 * Add Python 3.9 to setup.cfg and .travis.yml
 
