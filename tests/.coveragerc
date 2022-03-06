@@ -1,0 +1,11 @@
+[run]
+source =
+    **/busker/*
+omit =
+    *.rst
+    *.txt
+    **/busker/migrations/*
+    **/tests/*
+    **/venv/*
+    runtests.py
+    setup.py
