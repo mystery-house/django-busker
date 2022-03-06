@@ -7,6 +7,7 @@ Changelog
 * Remove the now-broken provides_args keyword argument from calls to Signal()
 * Clean up imports
 * Use a temporary MEDIA_ROOT directory when running tests
+* Remove travis config file
 
 0.7.4
 * PILLOW security upgrade
