@@ -1,21 +1,14 @@
+from datetime import datetime
 import os
-from random import randint
 import tempfile
-
 from PIL import Image
 from django.core.files import File
 from django.http import StreamingHttpResponse
-from django.test.client import RequestFactory
-from django.urls import reverse
-
-from busker.models import Artist, File as BuskerFile, DownloadCode, DownloadableWork, Batch, work_file_path, work_image_path, \
-    validate_code, generate_code
-from busker.util import get_client_ip, error_page
+from busker.models import Artist, File as BuskerFile, DownloadCode, DownloadableWork, Batch
 from django.test import TestCase
-from django.test.client import RequestFactory
-
-from busker.formatters import format_codes_csv
-from busker.models import DownloadCode
+from busker.formatters import format_codes_csv, CSV_DATE_FORMAT
+from csv import DictReader
+from io import StringIO
 
 
 class FormattersTestCase(TestCase):
@@ -56,7 +49,27 @@ class FormattersTestCase(TestCase):
         os.unlink(self.img2_file.name)
 
     def test_csv_formatter(self):
-        # TODO would be nice to test the actual expected CSV output
+        EXPECTED_FIELD_NAMES = ['download_code',
+                                'code_created_date', 'artist',
+                                'title', 'max_uses', 'times_used',
+                                'last_used_date', 'batch_label',
+                                'batch_private_note', 'batch_created_date',
+                                'batch_id', 'artist_id', 'work_id']
+
         codes = DownloadCode.objects.filter(batch=self.batch)
         response = format_codes_csv(codes)
         self.assertIsInstance(response, StreamingHttpResponse)
+
+        content = b''.join(response.streaming_content)
+
+        reader = DictReader(StringIO(content.decode('utf-8-sig')))
+
+        self.assertListEqual(reader.fieldnames, EXPECTED_FIELD_NAMES)
+        rows = list(reader)
+        self.assertEqual(len(rows), 10, "Expected 10 rows in CSV File")
+
+        # Test date strings from a single row
+        now = datetime.now()
+        date_str = now.strftime(CSV_DATE_FORMAT)
+        self.assertEqual(rows[0]['code_created_date'], date_str)
+        self.assertEqual(rows[0]['batch_created_date'], date_str)
